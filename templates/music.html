@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐</title>
+    <link rel="icon" href="{{ url_for('static', filename='image/document.ico') }}">
+    <script src="../static/js/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="div1" style="margin-left: 500px">
+    <p id="music_name" style="margin-left: 120px;font-size: 17px">{{ music_list[0] }}</p><br>
+    <audio id="audio" src="/static/music/{{ music_list[0] }}" controls></audio>
+    <br/>
+    <div style="margin-left: 45px">
+        <button id="btn-play">播放</button>
+        <button id="btn-stop">暂停</button>
+        <button id="btn-pre">上一首</button>
+        <button id="btn-next">下一首</button>
+    </div>
+</div>
+
+<script>
+    var audio = document.getElementById("audio");
+    var music_name = document.getElementById("music_name");
+    var value_music = "{% for i in music_list %}{{ i +',' }}{% endfor %}";
+    var music = value_music.split(",");//形成js中数组的形式
+    music.pop();
+    var num = 0;
+
+    $(document).ready(function () {
+        $("#btn-play").click(function () {
+            if (audio.paused)
+                audio.play();
+        });
+
+        $("#btn-stop").click(function () {
+            if (audio.played) {
+                audio.pause();
+            }
+        });
+
+        $("#btn-pre").click(function () {
+            if (num === 0) num = music.length - 1;
+            else num--;
+            audio.src = "/static/music/" + music[num];
+            music_name.innerHTML = music[num];
+            audio.play();
+        });
+
+        $("#btn-next").click(function () {
+            if (num === music.length - 1) num = 0;
+            else num++;
+            audio.src = "/static/music/" + music[num];
+            music_name.innerHTML = music[num];
+            audio.play();
+        });
+
+        audio.addEventListener('ended', function () {
+             $("#btn-next").click();
+        }, false);
+    });
+    /*
+    {#播放音乐#}
+
+    function play_music() {
+        if (audio.paused) {
+            audio.play();
+        }
+    }
+
+    {#暂停音乐#}
+
+    function pause_music() {
+        if (audio.played) {
+            audio.pause();
+        }
+    }
+
+    {#上一首音乐#}
+
+    function last_music() {
+        num = (num + (x.length - 2)) % (x.length - 1);
+        if (typeof (music[num]) === "undefined" || music[num] === "") {
+            audio.src = "/static/music/" + music[1] + ".mp3";
+            music_name.innerHTML = music[1];
+            audio.play();
+        } else {
+            audio.src = "/static/music/" + music[num] + ".mp3";
+            music_name.innerHTML = music[num];
+            audio.play();
+        }
+    }
+
+    {#下一首音乐#}
+
+    function next_music() {
+        num = (num + (x.length + 2)) % (x.length + 1);
+        if (typeof (music[num]) === "undefined" || music[num] === "") {
+            audio.src = "/static/music/" + music[2] + ".mp3";
+            music_name.innerHTML = music[2];
+            audio.play();
+        } else {
+            audio.src = "/static/music/" + music[num] + ".mp3";
+            music_name.innerHTML = music[num];
+            audio.play();
+        }
+    }
+
+    <!--自动播放下一首-->
+    audio.addEventListener('ended', function () {
+        next_music();
+    }, false);
+    */
+</script>
+
+</body>
+</html>
