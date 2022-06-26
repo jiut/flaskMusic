@@ -22,9 +22,7 @@
 <script>
     var audio = document.getElementById("audio");
     var music_name = document.getElementById("music_name");
-    var value_music = "{% for i in music_list %}{{ i +',' }}{% endfor %}";
-    var music = value_music.split(",");//形成js中数组的形式
-    music.pop();
+    var music = {{ music_list |tojson}} ;//safe: It's Happening ||| tojson:It\u0027s Happening
     var num = 0;
 
     $(document).ready(function () {
