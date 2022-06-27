@@ -11,6 +11,13 @@
         <button id="btn-pre">上一首</button>
         <button id="btn-next">下一首</button>
     </div>
+<form action="#">
+      <select name="play-modes" id="modes">
+        <option value="playlist">列表循环</option>
+        <option value="playsingle">单曲循环</option>
+        <option value="playrandom">随机播放</option>
+      </select>
+</form>
 </div>
 <form method="post">
     <input type="text" name="search" required placeholder="搜索"><br><br>
@@ -31,6 +38,7 @@
     var music_name = document.getElementById("music_name");
     var music = {{ music_list |tojson}} ;//safe: It's Happening ||| tojson:It\u0027s Happening
     var num = 0;
+    var singleplay = false;
 
     $(document).ready(function () {
         $("#btn-play").click(function () {
@@ -61,7 +69,10 @@
         });
 
         audio.addEventListener('ended', function () {
-             $("#btn-next").click();
+            if(singleplay)
+                audio.play();
+            else
+                $("#btn-next").click();
         }, false);
 
         $("li").dblclick(function () {
@@ -70,6 +81,12 @@
             music_name.innerHTML = music[num]["name"];
             audio.play();
         });
+
+        $("#modes").change(function () {
+            if(this.value === "playsingle") {
+                singleplay = true;
+            }
+        })
     });
     /*
     {#播放音乐#}
