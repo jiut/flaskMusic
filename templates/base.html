@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐</title>
+    <link rel="icon" href="{{ url_for('static', filename='image/document.ico') }}">
+    <script src="../static/js/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<!-- 插入到页面标题上方 -->
+{% for message in get_flashed_messages() %}
+    <div class="alert">{{ message }}</div>
+{% endfor %}
+
+{% block content %}{% endblock %}
+</body>
+</html>

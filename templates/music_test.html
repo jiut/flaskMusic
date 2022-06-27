@@ -71,6 +71,58 @@
             audio.play();
         });
     });
+    /*
+    {#播放音乐#}
+
+    function play_music() {
+        if (audio.paused) {
+            audio.play();
+        }
+    }
+
+    {#暂停音乐#}
+
+    function pause_music() {
+        if (audio.played) {
+            audio.pause();
+        }
+    }
+
+    {#上一首音乐#}
+
+    function last_music() {
+        num = (num + (x.length - 2)) % (x.length - 1);
+        if (typeof (music[num]) === "undefined" || music[num] === "") {
+            audio.src = "/static/music/" + music[1] + ".mp3";
+            music_name.innerHTML = music[1];
+            audio.play();
+        } else {
+            audio.src = "/static/music/" + music[num] + ".mp3";
+            music_name.innerHTML = music[num];
+            audio.play();
+        }
+    }
+
+    {#下一首音乐#}
+
+    function next_music() {
+        num = (num + (x.length + 2)) % (x.length + 1);
+        if (typeof (music[num]) === "undefined" || music[num] === "") {
+            audio.src = "/static/music/" + music[2] + ".mp3";
+            music_name.innerHTML = music[2];
+            audio.play();
+        } else {
+            audio.src = "/static/music/" + music[num] + ".mp3";
+            music_name.innerHTML = music[num];
+            audio.play();
+        }
+    }
+
+    <!--自动播放下一首-->
+    audio.addEventListener('ended', function () {
+        next_music();
+    }, false);
+    */
 </script>
 
 {% endblock %}
