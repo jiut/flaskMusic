@@ -11,6 +11,13 @@
         <button id="btn-pre">上一首</button>
         <button id="btn-next">下一首</button>
     </div>
+<form action="#">
+      <select name="play-modes" id="modes">
+        <option value="playlist">列表循环</option>
+        <option value="playsingle">单曲循环</option>
+        <option value="playrandom">随机播放</option>
+      </select>
+</form>
 </div>
 <form method="post">
     <input type="text" name="search" required placeholder="搜索"><br><br>
@@ -29,8 +36,9 @@
 <script>
     var audio = document.getElementById("audio");
     var music_name = document.getElementById("music_name");
-    var music = {{ music_list |tojson}} ;//safe: It's Happening ||| tojson:It\u0027s Happening
+    var music = {{ music_list |safe}} ;//safe: It's Happening ||| tojson:It\u0027s Happening
     var num = 0;
+    var mode = 0;
 
     $(document).ready(function () {
         $("#btn-play").click(function () {
@@ -45,23 +53,41 @@
         });
 
         $("#btn-pre").click(function () {
-            if (num === 0) num = music.length - 1;
-            else num--;
+            if(mode !== 2) {
+                if (num === 0) num = music.length - 1;
+                else num--;
+            }
+            else {
+                    num = temp;
+                    temp--;
+            }
             audio.src = music[num]["link"];
             music_name.innerHTML = music[num]["name"];
             audio.play();
         });
 
         $("#btn-next").click(function () {
-            if (num === music.length - 1) num = 0;
-            else num++;
+            if(mode !== 2) {
+                if (num === music.length - 1) num = 0;
+                else num++;
+            }
+            else {
+                temp = num;
+                do{
+                    num = Math.floor(Math.random() * music.length);
+                }
+                while(temp === num);
+            }
             audio.src = music[num]["link"];
             music_name.innerHTML = music[num]["name"];
             audio.play();
         });
 
         audio.addEventListener('ended', function () {
-             $("#btn-next").click();
+            if(mode === 1 )
+                audio.play();
+            else
+                $("#btn-next").click();
         }, false);
 
         $("li").dblclick(function () {
@@ -70,6 +96,18 @@
             music_name.innerHTML = music[num]["name"];
             audio.play();
         });
+
+        $("#modes").change(function () {
+            if(this.value === "playlist"){
+                mode = 0;
+            }
+            if(this.value === "playsingle") {
+                mode = 1;
+            }
+            if(this.value === "playrandom"){
+                mode = 2;
+            }
+        })
     });
 </script>
 

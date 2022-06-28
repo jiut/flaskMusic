@@ -12,11 +12,8 @@ url = "http://localhost:3000"
 
 @app.route('/')
 def music():
-    music_list = [{
-        "link": "http://m702.music.126.net/20220627163639/1bce7261f9c9f19e31efd87cac238a92/jd-musicrep-ts/4600/a5fa/c85f/555d31856cd048d0635a8903e3fdce2c.mp3",
-        "name": "海阔天空"}, {
-        "link": "http://m7.music.126.net/20220627163640/5368973424a8802f561489af210b8704/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/3293982182/6b94/780d/f60c/863291955df7f34ba1bd09f45fbc38d4.mp3",
-        "name": "海阔天空 (Live)"}]
+
+    music_list = [{"name":"请发起搜索", "link":"/"}]
 
     if request.method == 'POST':
         target = request.form["search"]
@@ -32,7 +29,7 @@ def music():
             dict = {"name": name, "link": link}
             print(dict)
             music_list.append(dict)
-    return render_template("music_test.html", music_list=music_list)
+    return render_template("music_test.html", music_list=music_list, title="首页")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -66,16 +63,13 @@ def login():
             username = request.form['username']
             requests.get(url + "/captcha/sent?phone=" + username)
 
-    return render_template("login.html")
+    return render_template("login.html", title="登录")
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-    music_list = [{
-                      "link": "http://m702.music.126.net/20220627163639/1bce7261f9c9f19e31efd87cac238a92/jd-musicrep-ts/4600/a5fa/c85f/555d31856cd048d0635a8903e3fdce2c.mp3",
-                      "name": "海阔天空"}, {
-                      "link": "http://m7.music.126.net/20220627163640/5368973424a8802f561489af210b8704/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/3293982182/6b94/780d/f60c/863291955df7f34ba1bd09f45fbc38d4.mp3",
-                      "name": "海阔天空 (Live)"}]
+
+    music_list = [{"name":"请发起搜索", "link":"/"}]
 
     if request.method == 'POST':
         target = request.form["search"]
@@ -91,7 +85,11 @@ def test():
             dict = {"name": name, "link": link}
             print(dict)
             music_list.append(dict)
-    return render_template("music_test.html", music_list=music_list)
+    return render_template("music_test.html", music_list=music_list, title="测试")
+
+
+# @app.route('/musictest', methods=["GET"])#,"POST"])
+# def musicSearch():
 
 
 if __name__ == '__main__':
