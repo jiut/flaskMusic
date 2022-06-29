@@ -1,114 +1,124 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="div1" style="margin-left: 500px">
-    <p id="music_name" style="margin-left: 120px;font-size: 17px">{{ music_list[0]["name"] }}</p><br>
-    <audio id="audio" src="{{ music_list[0]["link"] }}" controls></audio>
-    <br/>
-    <div style="margin-left: 45px">
-        <button id="btn-play">播放</button>
-        <button id="btn-stop">暂停</button>
-        <button id="btn-pre">上一首</button>
-        <button id="btn-next">下一首</button>
+    <div class="div1" style="margin-left: 500px">
+        <p id="music_name" style="margin-left: 120px;font-size: 17px">歌曲名</p><br>
+        <audio id="audio" src="\" controls></audio>
+        <br/>
+        <div style="margin-left: 45px">
+            <button id="btn-play">播放</button>
+            <button id="btn-stop">暂停</button>
+            <button id="btn-pre">上一首</button>
+            <button id="btn-next">下一首</button>
+        </div>
+        <form action="#">
+            <select name="play-modes" id="modes">
+                <option value="playlist">列表循环</option>
+                <option value="playsingle">单曲循环</option>
+                <option value="playrandom">随机播放</option>
+            </select>
+        </form>
     </div>
-<form action="#">
-      <select name="play-modes" id="modes">
-        <option value="playlist">列表循环</option>
-        <option value="playsingle">单曲循环</option>
-        <option value="playrandom">随机播放</option>
-      </select>
-</form>
-</div>
-<form method="post">
-    <input type="text" name="search" required placeholder="搜索"><br><br>
-    <input class="btn" type="submit" name="submit" value="搜索">
-</form>
-<ul class="music-list">
-        {% for music in music_list %}
-            <li id="{{ loop.index0 }}">
-                    {{ music.name }}
-            </li>
-        {% endfor %}
-
-</ul>
+    <input type="text" id="search" required placeholder="搜索"><br><br>
+    <button id="searchButton" class="btn-search">搜索</button>
+    <ul class="music-list">
+    </ul>
 
 
-<script>
-    var audio = document.getElementById("audio");
-    var music_name = document.getElementById("music_name");
-    var music = {{ music_list |safe}} ;//safe: It's Happening ||| tojson:It\u0027s Happening
-    var num = 0;
-    var mode = 0;
+    <script>
 
-    $(document).ready(function () {
-        $("#btn-play").click(function () {
-            if (audio.paused)
-                audio.play();
-        });
+        {#var music = {{ music_list |safe}} ;//safe: It's Happening ||| tojson:It\u0027s Happening#}
+        var num = 0;
+        var mode = 0;
 
-        $("#btn-stop").click(function () {
-            if (audio.played) {
-                audio.pause();
-            }
-        });
+        $(document).ready(function () {
+            let audio = document.getElementById("audio");
+            let music_name = document.getElementById("music_name");
+            let music = [];
+            music_name.innerHTML = "请发起搜索"
 
-        $("#btn-pre").click(function () {
-            if(mode !== 2) {
-                if (num === 0) num = music.length - 1;
-                else num--;
-            }
-            else {
+            $("#searchButton").click(function () {
+                $(".music-list").empty();
+                let keyword = $("#search").val();
+                let query = $.get("{{url_for("musicSearch", key="")}}" + keyword, function (data) {
+                    music = data["result"];
+                });
+                $.when(query).done(function () {
+                    audio.src = music[0]["link"];
+                    music_name.innerHTML = music[0]["name"];
+                    for (let i = 0; i < music.length; i++) {
+                        let listItem = ("<li id=" + i + ">" + music[i]["name"] + "</li>");
+                        $(listItem).appendTo(".music-list");
+                    }
+                    $("li").dblclick(function () {
+                        num = this.id;
+                        audio.src = music[num]["link"];
+                        music_name.innerHTML = music[num]["name"];
+                        audio.play();
+                    });
+                });
+            });
+
+            $("#btn-play").click(function () {
+                if (audio.paused)
+                    audio.play();
+            });
+
+            $("#btn-stop").click(function () {
+                if (audio.played) {
+                    audio.pause();
+                }
+            });
+
+            $("#btn-pre").click(function () {
+                if (mode !== 2) {
+                    if (num === 0) num = music.length - 1;
+                    else num--;
+                } else {
                     num = temp;
                     temp--;
-            }
-            audio.src = music[num]["link"];
-            music_name.innerHTML = music[num]["name"];
-            audio.play();
-        });
-
-        $("#btn-next").click(function () {
-            if(mode !== 2) {
-                if (num === music.length - 1) num = 0;
-                else num++;
-            }
-            else {
-                temp = num;
-                do{
-                    num = Math.floor(Math.random() * music.length);
                 }
-                while(temp === num);
-            }
-            audio.src = music[num]["link"];
-            music_name.innerHTML = music[num]["name"];
-            audio.play();
-        });
-
-        audio.addEventListener('ended', function () {
-            if(mode === 1 )
+                audio.src = music[num]["link"];
+                music_name.innerHTML = music[num]["name"];
                 audio.play();
-            else
-                $("#btn-next").click();
-        }, false);
+            });
 
-        $("li").dblclick(function () {
-            num = this.id;
-            audio.src = music[num]["link"];
-            music_name.innerHTML = music[num]["name"];
-            audio.play();
+            $("#btn-next").click(function () {
+                if (mode !== 2) {
+                    if (num === music.length - 1) num = 0;
+                    else num++;
+                } else {
+                    temp = num;
+                    do {
+                        num = Math.floor(Math.random() * music.length);
+                    }
+                    while (temp === num);
+                }
+                audio.src = music[num]["link"];
+                music_name.innerHTML = music[num]["name"];
+                audio.play();
+            });
+
+            audio.addEventListener('ended', function () {
+                if (mode === 1)
+                    audio.play();
+                else
+                    $("#btn-next").click();
+            }, false);
+
+
+            $("#modes").change(function () {
+                if (this.value === "playlist") {
+                    mode = 0;
+                }
+                if (this.value === "playsingle") {
+                    mode = 1;
+                }
+                if (this.value === "playrandom") {
+                    mode = 2;
+                }
+            });
         });
-
-        $("#modes").change(function () {
-            if(this.value === "playlist"){
-                mode = 0;
-            }
-            if(this.value === "playsingle") {
-                mode = 1;
-            }
-            if(this.value === "playrandom"){
-                mode = 2;
-            }
-        })
-    });
-</script>
+    </script>
 
 {% endblock %}

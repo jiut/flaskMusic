@@ -1,14 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <h3>Login</h3>
 <form method="post">
     手机号<br>
-    <input type="text" name="username" required><br><br>
+    <input id="phoneNumber" type="text" name="username" required><br><br>
     验证码<br>
     <!-- 密码输入框的 type 属性使用 password，会将输入值显示为圆点 -->
     <input type="password" name="password" ><br><br>
     <input class="btn" type="submit" name="submit" value="Submit">
-    <input class="btn" type="submit" name="validate" value="验证码">
 </form>
+    <button id="btn-validate">验证码</button>
+
+    <script>
+    $(document).ready(function () {
+        $("#btn-validate").click(function () {
+            let phoneNumber = $("#phoneNumber").val();
+            $.get("{{url_for("login")}}/" + phoneNumber) ;
+        });
+    });
+
+    </script>
+
 {% endblock %}
