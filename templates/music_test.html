@@ -32,7 +32,7 @@
         var mode = 0;
 
         $(document).ready(function () {
-            let audio = document.getElementById("audio");
+            let defaultAudio = document.getElementById("audio");
             let music_name = document.getElementById("music_name");
             let music = [];
             music_name.innerHTML = "请发起搜索"
@@ -45,30 +45,46 @@
                     music = data["result"];
                 });
                 $.when(query).done(function () {
-                    audio.src = music[0]["link"];
+                    defaultAudio.src = music[0]["link"];
                     $(".music-list").empty();
                     music_name.innerHTML = music[0]["name"];
+
                     for (let i = 0; i < music.length; i++) {
                         let listItem = ("<li id=" + i + ">" + music[i]["name"] + "</li>");
                         $(listItem).appendTo(".music-list");
+
+                        musicItem = music[i];
+                        ap.list.add({
+                                name: musicItem["name"],
+                                url: musicItem["link"],
+                                artist: musicItem["ar"],
+                                cover: musicItem["alPic"],
+                                lrc: musicItem["lrc"]
+                            }
+                        );
                     }
+                    ap.play();
+
+
                     $("li").dblclick(function () {
                         num = this.id;
-                        audio.src = music[num]["link"];
+                        defaultAudio.src = music[num]["link"];
                         music_name.innerHTML = music[num]["name"];
-                        audio.play();
+                        defaultAudio.play();
                     });
                 });
             });
 
             $("#btn-play").click(function () {
-                if (audio.paused)
-                    audio.play();
+                if (defaultAudio.paused)
+                    defaultAudio.play();
+                    ap.play();
             });
 
             $("#btn-stop").click(function () {
-                if (audio.played) {
-                    audio.pause();
+                if (defaultAudio.played) {
+                    defaultAudio.pause();
+                    ap.pause();
                 }
             });
 
@@ -80,9 +96,9 @@
                     num = temp;
                     temp--;
                 }
-                audio.src = music[num]["link"];
+                defaultAudio.src = music[num]["link"];
                 music_name.innerHTML = music[num]["name"];
-                audio.play();
+                defaultAudio.play();
             });
 
             $("#btn-next").click(function () {
@@ -96,14 +112,14 @@
                     }
                     while (temp === num);
                 }
-                audio.src = music[num]["link"];
+                defaultAudio.src = music[num]["link"];
                 music_name.innerHTML = music[num]["name"];
-                audio.play();
+                defaultAudio.play();
             });
 
-            audio.addEventListener('ended', function () {
+            defaultAudio.addEventListener('ended', function () {
                 if (mode === 1)
-                    audio.play();
+                    defaultAudio.play();
                 else
                     $("#btn-next").click();
             }, false);
