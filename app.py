@@ -3,7 +3,6 @@
 
 import requests
 from flask import Flask, render_template, url_for, redirect, flash, request
-import urllib.request
 
 app = Flask(__name__)
 app.secret_key = 'dev'
@@ -60,7 +59,7 @@ def musicSearch():
         search = requests.get(url + "/cloudsearch?keywords=" + key).json()
         search_cache[key] = search
         f_search.truncate(0)
-        f_search.write(str(search_cache))
+        f_search.write(str(search_cache).strip())
 
     f_search.close()
 
@@ -69,21 +68,24 @@ def musicSearch():
     for song in songs:
         name = song["name"]
         id = song["id"]
-        if (id in value_cache) and ("link" in value_cache[id]) and (
-                urllib.request.urlopen(value_cache[id]["link"]).code != 206):
-            link = value_cache[id]["link"]
-        else:
-            link = requests.get(url + "/song/url?id=" + str(id)).json()
-            link = link['data'][0]['url']
-            value_cache[id] = {"link": link}
-            is_value_change = is_value_change + 1
+        # if (id in value_cache) and ("link" in value_cache[id]) and (requests.get(value_cache[id]["link"]).status_code == 200):
+        #     link = value_cache[id]["link"]
+        # else:
+        #     link = requests.get(url + "/song/url?id=" + str(id)).json()
+        #     link = link['data'][0]['url']
+        #
+        #     value_cache[id].update({"link": link})
+        #     is_value_change = is_value_change + 1
 
         if (id in value_cache) and ("lrc" in value_cache[id]):
             lrc = value_cache[id]["lrc"]
         else:
             lrc = requests.get(url + "/lyric?id=" + str(id)).json()
             lrc = lrc["lrc"]["lyric"]
-            value_cache[id].update({"lrc": lrc})
+            if( id in value_cache):
+                value_cache[id].update({"lrc": lrc})
+            else:
+                value_cache[id] = {"lrc": lrc}
             is_value_change = is_value_change + 1
 
         is_value_change = False
@@ -96,15 +98,34 @@ def musicSearch():
             artist_list = artist_list + artist['name'] + '/'
 
         artist_list = artist_list[:-1]
-        dict = {"name": name, "link": link, "ar": artist_list, "lrc": lrc, "alPic": al['picUrl'] + "?param=130y130"}
+        dict = {"id": id, "name": name, "ar": artist_list, "lrc": lrc, "alPic": al['picUrl'] + "?param=130y130"}
+        # dict = {"id": id, "name": name, "ar": ar, "lrc": lrc, "alPic": al}
 
         music_list["result"].append(dict)
 
     if is_value_change > 0:
         f_value.truncate(0)
-        f_value.write(str(value_cache))
+        f_value.write(str(value_cache).strip())
     f_value.close()
     return music_list
+
+@app.route("/query-url")
+def QueryUrl():
+    key = request.args.get('id')
+    f_link = open('./LinkCache.txt', 'r+', encoding="utf-8")
+    link_cache = eval(f_link.readline())
+
+    if id in link_cache:
+        link = link_cache[id]["link"]
+    else:
+        link = requests.get(url + "/song/url?id=" + str(id)).json()
+        link = link['data'][0]['url']
+        req = requests.get(link)
+        link = url_for('static', filename='/music/'+ str(id) + ".mp3")
+        with open(link, "wb") as f:
+            f.write(req.content)
+
+    return link
 
 
 if __name__ == '__main__':

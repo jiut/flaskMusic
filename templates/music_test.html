@@ -37,17 +37,25 @@
             let music = [];
             music_name.innerHTML = "请发起搜索"
 
+            ap.on('play', function () {
+                //$.get("{{url_for("QueryUrl", id="")}}" + musicItem["id"]);
+                alert("x")
+            });
+
             $("#searchButton").click(function () {
                 $(".music-list").empty();
                 $('<li>搜索中</li>').appendTo(".music-list");
                 let keyword = $("#search").val();
                 let query = $.get("{{url_for("musicSearch", key="")}}" + keyword, function (data) {
                     music = data["result"];
+                    console.log(music);
                 });
                 $.when(query).done(function () {
                     defaultAudio.src = music[0]["link"];
                     $(".music-list").empty();
                     music_name.innerHTML = music[0]["name"];
+
+                    //ap.audio = [];
 
                     for (let i = 0; i < music.length; i++) {
                         let listItem = ("<li id=" + i + ">" + music[i]["name"] + "</li>");
@@ -56,14 +64,12 @@
                         musicItem = music[i];
                         ap.list.add({
                                 name: musicItem["name"],
-                                url: musicItem["link"],
                                 artist: musicItem["ar"],
                                 cover: musicItem["alPic"],
                                 lrc: musicItem["lrc"]
                             }
                         );
                     }
-                    ap.play();
 
 
                     $("li").dblclick(function () {
@@ -78,7 +84,7 @@
             $("#btn-play").click(function () {
                 if (defaultAudio.paused)
                     defaultAudio.play();
-                    ap.play();
+                ap.play();
             });
 
             $("#btn-stop").click(function () {
