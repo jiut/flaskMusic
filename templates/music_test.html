@@ -28,6 +28,7 @@
     <script>
         var num = 0;
         var mode = 0;
+        var searchCount = 0;
 
         $(document).ready(function () {
             let defaultAudio = document.getElementById("audio");
@@ -58,12 +59,14 @@
                             name: musicItem["name"],
                             artist: musicItem["ar"],
                             cover: musicItem["alPic"],
-                            //lrc: musicItem["lrc"],//"/querylrc/" + musicItem["id"],
+                            lrc: musicItem["lrc"],//"/querylrc/" + musicItem["id"],
                             url: "/queryurl/" + musicItem["id"]//"http://m7.music.126.net/20220701143614/966b5d076bc0fece4bbbb0ea6fd896a3/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/14051326217/1954/cfa5/a2ee/894fd07ed447d3f230ac75fe42ece273.mp3"
                         });
                     }
 
+                    ap.list.switch(searchCount * 30);
                     ap.play();
+                    searchCount++;
 
                     $("li").dblclick(function () {
                         num = this.id;
