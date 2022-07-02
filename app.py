@@ -122,7 +122,7 @@ def queryurl(id):
             return "/"
 
         temp_link = url_for('static', filename='music/' + id + ".mp3")
-        req = requests.get(link)
+        req = requests.get(link, timeout=None)
         with open("." + temp_link, "wb") as f:
             f.write(req.content)
 
