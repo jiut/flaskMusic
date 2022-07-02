@@ -26,8 +26,6 @@
 
 
     <script>
-
-        {#var music = {{ music_list |safe}} ;//safe: It's Happening ||| tojson:It\u0027s Happening#}
         var num = 0;
         var mode = 0;
 
@@ -36,11 +34,6 @@
             let music_name = document.getElementById("music_name");
             let music = [];
             music_name.innerHTML = "请发起搜索"
-
-            ap.on('play', function () {
-                //$.get("{{url_for("QueryUrl", id="")}}" + musicItem["id"]);
-                alert("x")
-            });
 
             $("#searchButton").click(function () {
                 $(".music-list").empty();
@@ -55,7 +48,6 @@
                     $(".music-list").empty();
                     music_name.innerHTML = music[0]["name"];
 
-                    //ap.audio = [];
 
                     for (let i = 0; i < music.length; i++) {
                         let listItem = ("<li id=" + i + ">" + music[i]["name"] + "</li>");
@@ -63,14 +55,15 @@
 
                         musicItem = music[i];
                         ap.list.add({
-                                name: musicItem["name"],
-                                artist: musicItem["ar"],
-                                cover: musicItem["alPic"],
-                                lrc: musicItem["lrc"]
-                            }
-                        );
+                            name: musicItem["name"],
+                            artist: musicItem["ar"],
+                            cover: musicItem["alPic"],
+                            //lrc: musicItem["lrc"],//"/querylrc/" + musicItem["id"],
+                            url: "/queryurl/" + musicItem["id"]//"http://m7.music.126.net/20220701143614/966b5d076bc0fece4bbbb0ea6fd896a3/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/14051326217/1954/cfa5/a2ee/894fd07ed447d3f230ac75fe42ece273.mp3"
+                        });
                     }
 
+                    ap.play();
 
                     $("li").dblclick(function () {
                         num = this.id;

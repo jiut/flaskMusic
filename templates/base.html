@@ -8,6 +8,16 @@
     <link rel="stylesheet" href="../static/aplayer/dist/APlayer.min.css">
     <script src="../static/aplayer/dist/APlayer.min.js"></script>
     {#    <script src="../static/js/custome.js"></script>#}
+    <style>
+        p.aplayer-lrc-current {
+            font-size: initial !important;
+        }
+    </style>
+
+    <div id="player">
+
+</div>
+
 </head>
 <body>
 <!-- 插入到页面标题上方 -->
@@ -18,19 +28,26 @@
 
 {% block content %}{% endblock %}
 
-<div id="aplayer"></div>
+<div id="aplayer"><div id="player"><pre class="aplayer-lrc-content">
+        [00:00.00]APlayer audio1
+        [00:04.01]is
+        [00:08.02]amazing
+        <!-- ... -->
+    </pre></div></div>
+
+
 
 <script>
     $(document).ready(function () {
-        $(".aplayer-miniswitcher").trigger("click");
+        {#$(".aplayer-miniswitcher").trigger("click");#}
+        $("#aplayer").removeClass("aplayer-narrow");
     });
 
     const ap = new APlayer({
         container: document.getElementById('aplayer'),
         fixed: true,
         listFolded: true,
-        lrcType: 1,
-        audio: []
+        lrcType: 2
     });
 </script>
 

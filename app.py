@@ -1,9 +1,14 @@
 # 需要网易云api
 
-
 import requests
 from flask import Flask, render_template, url_for, redirect, flash, request
+import re
+from concurrent.futures import ThreadPoolExecutor
 
+# DOCS https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
+# 创建线程池执行器
+
+executor = ThreadPoolExecutor(2)
 app = Flask(__name__)
 app.secret_key = 'dev'
 
@@ -58,8 +63,10 @@ def musicSearch():
     else:
         search = requests.get(url + "/cloudsearch?keywords=" + key).json()
         search_cache[key] = search
+        f_search.seek(0)  # 得把指针移动到开头再truncate才行，要不然会出现NUL
         f_search.truncate(0)
-        f_search.write(str(search_cache).strip())
+        write_line = str(search_cache)
+        f_search.write(write_line)
 
     f_search.close()
 
@@ -82,13 +89,11 @@ def musicSearch():
         else:
             lrc = requests.get(url + "/lyric?id=" + str(id)).json()
             lrc = lrc["lrc"]["lyric"]
-            if( id in value_cache):
+            if (id in value_cache):
                 value_cache[id].update({"lrc": lrc})
             else:
                 value_cache[id] = {"lrc": lrc}
             is_value_change = is_value_change + 1
-
-        is_value_change = False
 
         ar = song["ar"]
         al = song["al"]
@@ -98,34 +103,86 @@ def musicSearch():
             artist_list = artist_list + artist['name'] + '/'
 
         artist_list = artist_list[:-1]
-        dict = {"id": id, "name": name, "ar": artist_list, "lrc": lrc, "alPic": al['picUrl'] + "?param=130y130"}
-        # dict = {"id": id, "name": name, "ar": ar, "lrc": lrc, "alPic": al}
+        dict = {"id": id, "name": name, "ar": artist_list, "alPic": al['picUrl'] + "?param=130y130", "lrc": lrc}
+        # dict = {"lrc": lrc, "alPic": al,  "ar": ar, "name": name, "id": id}
 
         music_list["result"].append(dict)
 
-    if is_value_change > 0:
-        f_value.truncate(0)
-        f_value.write(str(value_cache).strip())
-    f_value.close()
+    # if is_value_change > 0:
+    #     f_value.seek(0)
+    #     f_value.truncate(0)
+    #     write_line = str(value_cache)
+    #     f_value.write(write_line)
+    # f_value.close()
     return music_list
 
-@app.route("/query-url")
-def QueryUrl():
-    key = request.args.get('id')
+
+@app.route("/queryurl/<id>")#链接
+def queryurl(id):
     f_link = open('./LinkCache.txt', 'r+', encoding="utf-8")
     link_cache = eval(f_link.readline())
 
     if id in link_cache:
-        link = link_cache[id]["link"]
+        link = url_for("static", filename="music/" + id + '.mp3')
     else:
-        link = requests.get(url + "/song/url?id=" + str(id)).json()
-        link = link['data'][0]['url']
-        req = requests.get(link)
-        link = url_for('static', filename='/music/'+ str(id) + ".mp3")
-        with open(link, "wb") as f:
-            f.write(req.content)
+        link = requests.get(url + "/song/url?id=" + id).json()
+        if "data" in link:
+            link = link['data'][0]['url']
+        else:
+            return "/"
 
-    return link
+        # executor.submit(downloader, id, link)
+
+        # link_cache.add(id)
+        # f_link.seek(0)
+        # f_link.truncate(0)
+        # f_link.write(link_cache)
+
+    f_link.close()
+
+    return redirect(link)
+
+
+@app.route("/querylrc/<id>")#歌词
+def querylrc(id):
+    f_value = open('./ValueCache.txt', 'r+', encoding="utf-8")
+    value_cache = eval(f_value.readline())
+
+    if (id in value_cache) and ("lrc" in value_cache[id]):
+        lrc = value_cache[id]["lrc"]
+    else:
+        lrc = requests.get(url + "/lyric?id=" + id).json()
+        lrc = lrc["lrc"]["lyric"]
+        value_cache[id] = {"lrc": lrc}
+
+        f_value.seek(0)
+        f_value.truncate(0)
+        write_line = str(value_cache)
+        f_value.write(write_line)
+
+    f_value.close()
+
+    return lrc
+
+
+def downloader(id, link):
+    id = request.args.get("id")
+    temp_link = url_for('static', filename='music/' + id + ".mp3")
+
+    link = request.args.get("link")
+    req = requests.get(link)
+    with open("." + temp_link, "wb") as f:
+        f.write(req.content)
+    return "complete"
+
+
+@app.route("/downloadtest")
+def downloadtest():
+    redirect(url_for("downloader",
+                     link="http://m8.music.126.net/20220701173048/9d7187d4010629789a4d93835605134f/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/14054238118/3937/706d/7e7b/a65b577e39ee0d8c88a2936b409f7300.mp3",
+                     id="1913532415"))
+
+    return "test"
 
 
 if __name__ == '__main__':
