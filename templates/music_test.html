@@ -42,14 +42,13 @@
                 let keyword = $("#search").val();
                 let query = $.get("{{url_for("musicSearch", key="")}}" + keyword, function (data) {
                     music = data["result"];
-                    console.log(music);
                 });
                 $.when(query).done(function () {
                     defaultAudio.src = music[0]["link"];
                     $(".music-list").empty();
                     music_name.innerHTML = music[0]["name"];
 
-
+                    let count = 0;
                     for (let i = 0; i < music.length; i++) {
                         let listItem = ("<li id=" + i + ">" + music[i]["name"] + "</li>");
                         $(listItem).appendTo(".music-list");
@@ -62,11 +61,17 @@
                             lrc: musicItem["lrc"],//"/querylrc/" + musicItem["id"],
                             url: "/queryurl/" + musicItem["id"]//"http://m7.music.126.net/20220701143614/966b5d076bc0fece4bbbb0ea6fd896a3/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/14051326217/1954/cfa5/a2ee/894fd07ed447d3f230ac75fe42ece273.mp3"
                         });
+                        count++;
                     }
 
                     ap.list.switch(searchCount * 30);
                     ap.play();
                     searchCount++;
+
+                    setTheme(ap.list.index);
+                    ap.on('listswitch', (index) => {
+                        setTheme(index);
+                    });
 
                     $("li").dblclick(function () {
                         num = this.id;

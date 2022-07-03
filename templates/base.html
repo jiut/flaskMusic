@@ -7,7 +7,7 @@
     <script src="../static/js/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="../static/aplayer/dist/APlayer.min.css">
     <script src="../static/aplayer/dist/APlayer.min.js"></script>
-    {#    <script src="../static/js/custome.js"></script>#}
+    <script src="../static/js/color-thief.umd.js"></script>
     <style>
         p.aplayer-lrc-current {
             font-size: initial !important;
@@ -16,7 +16,7 @@
 
     <div id="player">
 
-</div>
+    </div>
 
 </head>
 <body>
@@ -43,6 +43,38 @@
         listFolded: true,
         lrcType: 1
     });
+
+    const colorThief = new ColorThief();
+    const image = new Image();
+    const xhr = new XMLHttpRequest();
+
+    var color = "rgb(183, 218, 255)";
+
+    const setTheme = (index) => {
+        if (typeof (index) === "object") {
+            index = index['index'];
+        }
+        if (!(ap.list.audios[index].theme)) {
+            xhr.onload = function () {
+                let coverUrl = URL.createObjectURL(this.response);
+                image.onload = function () {
+                    color = colorThief.getColor(image);
+                    colorset = colorThief.getPalette(image);
+                    colorset.unshift(color)
+
+                    color = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    ap.theme(color, index);
+                    URL.revokeObjectURL(coverUrl);
+                };
+                image.src = coverUrl;
+            }
+            xhr.open('GET', ap.list.audios[index].cover, true);
+            xhr.responseType = 'blob';
+            xhr.send();
+        } else {
+            color = ap.list.audios[index].theme;
+        }
+    };
 </script>
 
 </body>
